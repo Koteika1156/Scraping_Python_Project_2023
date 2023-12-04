@@ -1,0 +1,27 @@
+version: '3.1'
+
+services:
+  app:
+    build: frontend/
+    ports:
+      - "5000:5000"
+      - 5900:5900
+    networks:
+      - web
+    shm_size: '2g'
+    volumes:
+      - ./frontend:/app
+      - ./backend:/app/backend
+    depends_on:
+      - backend
+
+  backend:
+    build: backend/
+    volumes:
+      - ./backend:/app
+    networks:
+      - web
+
+networks:
+    web:
+      driver:  bridge
