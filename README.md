@@ -82,6 +82,7 @@
 ![image](https://github.com/Koteika1156/Scraping_Python_Project_2023/assets/89998783/7be9eed5-adb3-4117-968d-d7d8e78d7c61)
 
 Выберете пункт из списка и нажмите на кнопку ниже, в этом случае будет выведены все товары по этому запросу из базы данных.
+
 ![image](https://github.com/Koteika1156/Scraping_Python_Project_2023/assets/89998783/cc55f5ed-350e-4fa6-b045-31bcabf65fab)
 
 Если вы устанапливали парсер используя docker-compose, то, после пересборки проекта, база данных с прошлыми запросами будет сохранена.
