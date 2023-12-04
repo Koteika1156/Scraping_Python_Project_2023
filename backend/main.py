@@ -9,6 +9,7 @@ from backend.exceptions import *
 from backend.functions import *
 import random
 
+
 # DNS парсит скидки а не цены(Ноутбук MSI)
 # Добавить URL
 
@@ -68,8 +69,9 @@ class Parser:
                 if i.get("name") == 'qrator_jsid':
                     cookie_value = i.get("value")
                     break
-            
-	self.__cookies = dict(     cookies_are=f'current_path=0ade23fd6a439b986198c2aac1213be47601fdc95f22e1ed4bdbc2f5a7d45646a%3A2%3A%7Bi%3A0%3Bs%3A12%3A%22current_path%22%3Bi%3A1%3Bs%3A109%3A%22%7B%22city%22%3A%22a9f47dbf-f564-11de-97f8-00151716f9f5%22%2C%22cityName%22%3A%22%5Cu041f%5Cu0435%5Cu0440%5Cu043c%5Cu044c%22%2C%22method%22%3A%22manual%22%7D%22%3B%7D; lang=ru; city_path=perm; qrator_jsid={cookie_value}')
+
+            self.__cookies = dict(
+                cookies_are=f'current_path=0ade23fd6a439b986198c2aac1213be47601fdc95f22e1ed4bdbc2f5a7d45646a%3A2%3A%7Bi%3A0%3Bs%3A12%3A%22current_path%22%3Bi%3A1%3Bs%3A109%3A%22%7B%22city%22%3A%22a9f47dbf-f564-11de-97f8-00151716f9f5%22%2C%22cityName%22%3A%22%5Cu041f%5Cu0435%5Cu0440%5Cu043c%5Cu044c%22%2C%22method%22%3A%22manual%22%7D%22%3B%7D; lang=ru; city_path=perm; qrator_jsid={cookie_value}')
 
     def ulr_to_parse(self, request, shop):
         request = request.strip()
