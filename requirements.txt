@@ -1,0 +1,4 @@
+requests
+undetected_chromedriver
+bs4
+flask
