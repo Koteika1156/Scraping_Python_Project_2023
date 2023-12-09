@@ -54,10 +54,23 @@ div.upper {
     font-size: 20px;
     align-items: center;
     justify-content: center;
+    margin-top: 50px;
 }
 
 td {
     border: 1px solid #333;
+    height: 30px;
+    min-width: 80px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+td.id_ {
+    min-width: 25px;
+}
+
+td.shop {
+    text-align: center;
 }
 
 div.lower {
@@ -101,6 +114,20 @@ input.main_button {
     flex-direction: column;
 }
 
+.popup2 {
+    display: none; /* По умолчанию скрыто */
+    position: fixed; /* Фиксированное положение */
+    top: 50%; /* Расположение по вертикали */
+    left: 50%; /* Расположение по горизонтали */
+    transform: translate(-50%, -50%); /* Центрирование */
+    width: 600px; /* Ширина окна */
+    height: 200px; /* Высота окна */
+    background-color: #fff; /* Цвет фона */
+    border: 1px solid #000; /* Граница */
+    padding: 20px; /* Отступы внутри окна */
+    flex-direction: column;
+}
+
 img.history_img {
    height: 30px;
     width: 30px;
@@ -123,4 +150,9 @@ div.request_description {
     justify-content: center;
     font-size: 24px;
     font-weight: bold;
+    padding: 50px;
+}
+
+select.select_class {
+    visibility: hidden;
 }

@@ -1,63 +1,108 @@
 <html>
-
-<head>
-    <title>Парсер</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-            crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='img/title.png') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</head>
-
-<body>
-<div class="main">
-    <div class="header">
-        <p class="header_title">DNS / Citilink Parser</p>
-    </div>
-    <div class="content">
-        <div class="upper">
-            <div class="his_1"></div>
-            <form action="" method="post" id="first_form">
-                <input type="text" name="request"><br>
-                <input type="submit" value="Спарсить!" class="main_button">
-                <div>
-                <input type="checkbox" id="coding" name="checkbox">
-                <label for="coding">Исключить из парсинга товары, в названии которых отсутствует поисковой запрос.</label>
-              </div>
+	<head>
+		<title>Парсер</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"/>
+			<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+				<link rel="icon" href="{{ url_for('static', filename='img/title.png') }}">
+					<meta name="viewport" content="width=device-width, initial-scale=1">
+						<script src="{{ url_for('static', filename='js/script.js') }}"/>
+					</head>
+					<body>
+						<div class="main">
+							<div class="header">
+								<p class="header_title">DNS / Citilink Parser</p>
+							</div>
+							<div class="content">
+								<div class="upper">
+									<div class="his_1"/>
+									<form action="" method="post" id="first_form">
+										<input type="text" name="request">
+											<br>
+												<input type="submit" value="Спарсить!" class="main_button" onClick="this.form.submit(); this.disabled=true; this.value='Парсим…';">
             </form>
-            <div class="his"><a href="#" onclick="document.getElementById('popup').style.display='flex'"><img
-                    src="{{ url_for('static', filename='img/history.png') }}" class="history_img"></a></div>
-            <div class="popup" id="popup">
-                <div><a href="#" onclick="document.getElementById('popup').style.display='none'"><img
-                        src="{{ url_for('static', filename='img/close.png') }}" class="history_img"></a></div>
-                <div>
+												<div class="his">
+													<a href="#" id="history_button" onClick="document.getElementById('popup').style.display='flex';
+            document.getElementById('history_button').style.display='none';
+            document.getElementById('filter_button').style.display='none';
+">
+														<img src="{{ url_for('static', filename='img/history.png') }}" class="history_img"/>
+													</div>
+
+            {% if req %}
+            <div class="his">
+														<a href="#" id="filter_button" onClick="document.getElementById('popup2').style.display='flex';
+            document.getElementById('history_button').style.display='none';
+            document.getElementById('filter_button').style.display='none';
+">
+															<img src="{{ url_for('static', filename='img/filter.png') }}" class="history_img"/>
+														</div>
+            {% endif %}
+
+            <div class="popup2" id="popup2">
+															<div>
+																<a href="#" onClick="document.getElementById('popup2').style.display='none';
+                document.getElementById('history_button').style.display='block';
+                document.getElementById('filter_button').style.display='block';
+">
+																	<img src="{{ url_for('static', filename='img/close.png') }}" class="history_img"/>
+																</div>
+																<div>
+																	<form action="" method="post" id="second_form">
+																		<select name="select2" class="select_class">
+																			<option value="{{ req }}"/>
+																		</select>
+																		<div style="
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        ">
+																			<div>
+																				<input type="checkbox" id="coding" name="checkbox">
+																					<label for="coding">Убрать товары безпоискового запроса в названии.</label>
+																				</div>
+																				<div>
+																					<input type="checkbox" id="sale" name="sale">
+																						<label for="sale">Убрать товары без скидки.</label>
+																					</div>
+																					<p>
+																						<input type="submit" value="Отфильтровать">
+                        </p>
+																					</div>
+																				</form>
+																			</div>
+																		</div>
+																		<div class="popup" id="popup">
+																			<div>
+																				<a href="#" onClick="document.getElementById('popup').style.display='none';
+                document.getElementById('history_button').style.display='block';
+                document.getElementById('filter_button').style.display='block';">
+																					<img src="{{ url_for('static', filename='img/close.png') }}" class="history_img"/>
+																				</div>
+																				<div>
                     {% if req_list %}
-                    <form action="" method="post" id="second_form">
-                        <p>
-                        <p>История запросов:</p>
-                        <select name="select">
+                    <form action="" method="post" id="third_form">
+																						<p>
+																							<p>История запросов:</p>
+																							<select name="select">
                             {% for j in req_list %}
                             <option value="{{ j[1] }}">{{ j[1] }}</option>
                             {% endfor %}
                         </select>
+																						</p>
+																						<br>
+																							<p>
+																								<input type="submit" value="Показать">
                         </p>
-                        <br>
-                        <p>
-                            <input type="submit" value="Показать">
-                        </p>
-                    </form>
+																							</form>
                     {% endif %}
                     {% if not req_list %}
                     <p>История запросов пуста.</p>
                     {% endif %}
                 </div>
-            </div>
-        </div>
-        <div class="request_description">
+																					</div>
+																				</div>
+																				<div class="request_description">
             {% if not err %}
             {% if req %}
             <p>Товары по запросу: "{{req}}"</p>
@@ -67,29 +112,90 @@
             <p>{{err}} {% if err[0] != "П" %}{{req}}{% endif %}</p>
             {% endif %}
         </div>
-        <div class="lower">
-            <table>
+																				<div class="lower">
+																					<table>
+                {% if name %}
+                <tr>
+																							<th>id</th>
+																							<th>Товар</th>
+																							<th>Магазин</th>
+																							<th>Рейтинг</th>
+																							<th>Цвет</th>
+																							<th>Цена</th>
+																							<th>Старая цена</th>
+																							<th>Текущая скидка</th>
+																						</tr>
+                {% endif %}
+
                 {% for i in name %}
                 {% if i %}
                 {% set colors_list = split_colors(i[3]) %}
                 {% set arr_len = colors_list|length %}
                 <tr>
-                    <td rowspan="{{arr_len}}">{{ loop.index }}</td>
+																							<td class="id_" rowspan="{{arr_len}}">{{ loop.index }}</td>
                     {% if arr_len == 1 %}
-                    <td rowspan="{{arr_len}}">{{ i[1] }}</td>
+                    <td rowspan="{{arr_len}}">
+																								<a href="{{ i[7] }}">{{ i[1] }}</a>
+																							</td>
                     {% endif %}
                     {% if arr_len != 1 %}
-                    <td rowspan="{{arr_len}}">{{ i[2] }}</td>
+                    <td rowspan="{{arr_len}}">
+																								<a href="{{ i[7] }}">{{ i[2] }}</a>
+																							</td>
                     {% endif %}
-                    <td rowspan="{{arr_len}}">{{ i[4] }}</td>
-                    <td>{% if colors_list[0][0] != "None" and arr_len != 1 %} {{ colors_list[0][0] }} {% endif %} {{ colors_list[0][1]}}
+                    <td rowspan="{{arr_len}}" class="shop">{{ i[4] }}</td>
+																							<td rowspan="{{arr_len}}" class="shop">
+                        {% if i[8] != "0" %}
+                        {{ i[8] }}
+                        {% else %}
+                        --//--
+                        {% endif %}
                     </td>
+																							<td class="shop">{% if colors_list[0][0] != "None" and arr_len != 1 %}
+                        {{ colors_list[0][0] }}
+                        {% else %}
+                        --//--
+                        {% endif %}
+                    </td>
+                    {% set price_list = split_price(colors_list[0][1]) %}
+
+                    {% set a = price_list[0]|int %}
+                    {% set b = price_list[1]|int %}
+                    {% set c = '{0:0.2f}'.format((a - b) / a)|float %}
+                    {% set c = 100 * c %}
+
+                    {% if b == 0 %}
+                    <td>{{ a }}</td>
+																							<td>{{ b }}</td>
+																							<td>0%</td>
+
+                    {% else %}
+                    <td>{{ b }}</td>
+																							<td>{{ a }}</td>
+																							<td>{{ c |int}}%</td>
+                    {% endif %}
                 </tr>
                 {% if arr_len > 1 %}
                 {% for colors_dict in colors_list %}
                 {% if colors_dict[0] != colors_list[0][0] %}
                 <tr>
-                    <td>{{ colors_dict[0]}} {{ colors_dict[1]}}</td>
+                    {% set price_list = split_price(colors_dict[1]) %}
+                    {% set a = price_list[0]|int %}
+                    {% set b = price_list[1]|int %}
+                    {% set c = '{0:0.2f}'.format((a - b) / a)|float %}
+                    {% set c = 100 * c %}
+                    <td class="shop">{{ colors_dict[0] }}</td>
+
+                    {% if b == 0 %}
+                    <td>{{ a }}</td>
+																							<td>{{ b }}</td>
+																							<td>0%</td>
+
+                    {% else %}
+                    <td>{{ b }}</td>
+																							<td>{{ a }}</td>
+																							<td>{{ c |int}}%</td>
+                    {% endif %}
                 </tr>
                 {% endif %}
                 {% endfor %}
@@ -97,8 +203,8 @@
                 {% endif %}
                 {% endfor %}
             </table>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+																				</div>
+																			</div>
+																		</div>
+																	</body>
+																</html>
