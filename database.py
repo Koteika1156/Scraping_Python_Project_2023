@@ -1,5 +1,37 @@
 import sqlite3
+import datetime
 
+def check_db():
+    """ Проверка на существование таблиц """
+
+    with sqlite3.connect('my_database.db') as con:
+        cursor = con.cursor()
+
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS requests (
+        request_id INTEGER PRIMARY KEY,
+        request TEXT NOT NULL,
+        successful bool NOT NULL,
+        request_time TEXT NOT NULL
+        )
+        ''')
+
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS goods (
+        id INTEGER PRIMARY KEY,
+        original_name TEXT NOT NULL,
+        name TEXT NOT NULL,
+        price TEXT NOT NULL,
+        shop TEXT NOT NULL,
+        code TEXT NOT NULL,
+        request_id TEXT NOT NULL,
+        url TEXT NOT NULL,
+        rating TEXT NOT NULL,
+        sale TEXT NOT NULL,
+        max_sale INTEGER NOT NULL,
+        FOREIGN KEY (request_id) REFERENCES requests(request_id)
+        )
+        ''')
 
 def change_request(req):
     """ В конце парсинга устанавливает запросу флаг, что парсинг прошел успешно """
@@ -62,6 +94,29 @@ def get_all_requests():
 
     return answ
 
+def get_goods_with_max_sale(request, is_all):
+    with sqlite3.connect('my_database.db') as con:
+        cursor = con.cursor()
+        request.lower()
+        req_id = check_requsts_list(request)[0]
+
+        request = request.replace(" ", "%")
+        first_symbol = request[0]
+        request = request.replace(first_symbol, "_", 1)
+
+        if is_all:
+            Citilink_query = f'SELECT * FROM goods WHERE shop = "Citilink" AND request_id = "{req_id}" AND max_sale != 0 ORDER BY max_sale DESC LIMIT 5'
+            dns_query = f'SELECT * FROM goods WHERE shop = "DNS" AND request_id = "{req_id}" AND max_sale != 0 ORDER BY max_sale DESC LIMIT 5'
+        else:
+            Citilink_query = f"SELECT * FROM goods WHERE shop ='Citilink' AND request_id = '{req_id}' AND max_sale != 0 AND original_name LIKE '%{request}%' ORDER BY max_sale DESC LIMIT 5"
+            dns_query = f"SELECT * FROM goods WHERE shop ='DNS' AND request_id = '{req_id}' AND max_sale != 0 AND original_name LIKE '%{request}%' ORDER BY max_sale DESC LIMIT 5"
+
+        cursor.execute(Citilink_query)
+        Citilink_res = cursor.fetchall()
+        cursor.execute(dns_query)
+        DNS_res = cursor.fetchall()
+        res = [Citilink_res, DNS_res]
+        return res
 
 def get_goods(request, is_all, is_sale):
     """ Получение товаров из БД по запросу """
@@ -91,6 +146,16 @@ def get_goods(request, is_all, is_sale):
 
     return result
 
+def get_date(req):
+    with sqlite3.connect('my_database.db') as con:
+        cursor = con.cursor()
+        check_db()
+
+        cursor.execute(f"SELECT request_time FROM requests WHERE request = '{req}'")
+
+        a = cursor.fetchall()
+        return a[0][0]
+
 
 def add_request(request):
     """ Добавить запрос в таблицу запросов """
@@ -100,13 +165,16 @@ def add_request(request):
         check_db()
 
         cursor.execute("SELECT * FROM requests ORDER BY request_id DESC LIMIT 1")
+
         a = cursor.fetchall()
         if a:
             pos = a[0][0] + 1
         else:
             pos = 1
-        cursor.execute('INSERT INTO requests (request_id, request, successful) VALUES (?, ?, ?)',
-                       (f'{pos}', f'{request}', False))
+
+        now = datetime.datetime.now().replace(microsecond=0)
+        cursor.execute('INSERT INTO requests (request_id, request, successful, request_time) VALUES (?, ?, ?, ?)',
+                       (f'{pos}', f'{request}', False, now))
 
         con.commit()
 
@@ -132,38 +200,9 @@ def insert_db(dict):
                 price_str = price_str + ","
 
         cursor.execute(
-            'INSERT INTO goods (original_name, name, price, shop, code, request_id, url, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO goods (original_name, name, price, shop, code, request_id, url, rating, sale, max_sale) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (f'{dict["original_name"]}', f'{dict["name"]}', f'{price_str}', f'{dict["shop"]}', f'{dict["code"]}',
-             f'{dict["request"]}', f'{dict["url"]}', f'{dict["rating"]}'))
+             f'{dict["request"]}', f'{dict["url"]}', f'{dict["rating"]}', f'{dict["sale"]}', f'{dict["max_sale"]}'))
 
         con.commit()
 
-
-def check_db():
-    """ Проверка на существование таблиц """
-
-    with sqlite3.connect('my_database.db') as con:
-        cursor = con.cursor()
-
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS requests (
-        request_id INTEGER PRIMARY KEY,
-        request TEXT NOT NULL,
-        successful bool NOT NULL
-        )
-        ''')
-
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS goods (
-        id INTEGER PRIMARY KEY,
-        original_name TEXT NOT NULL,
-        name TEXT NOT NULL,
-        price TEXT NOT NULL,
-        shop TEXT NOT NULL,
-        code TEXT NOT NULL,
-        request_id TEXT NOT NULL,
-        url TEXT NOT NULL,
-        rating TEXT NOT NULL,
-        FOREIGN KEY (request_id) REFERENCES requests(request_id)
-        )
-        ''')

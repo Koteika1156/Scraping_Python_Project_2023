@@ -2,7 +2,6 @@ import random
 import string
 import re
 
-
 def random_string():
     """ Функция генерации строки для получения цен товаров в ДНС """
 
@@ -17,11 +16,9 @@ def random_string():
 def sort(x=str):
     return int(x[:x.find("#")])
 
-
 def split_price(str_=""):
     str_ = str_.split("#")
     return str_
-
 
 def split_colors(str_=""):
     """ Предварительная обработка цен для вывода в html шаблон """
@@ -32,6 +29,21 @@ def split_colors(str_=""):
         new_arr.append(i.split(":"))
     return new_arr
 
+def organaze_sale(x):
+    split_pr = split_price(x[9])
+    k = 0
+    for i in split_pr:
+        k += 1
+        if int(i) == x[10]:
+            break
+
+    list_pr = split_colors(x[3])
+    print("#" * 100)
+    print(x)
+    print(list_pr, "   ", k)
+    print("#" * 100)
+    res = [list_pr[k - 1]]
+    return res
 
 def restruct(arr):
     new_arr = []
@@ -67,18 +79,15 @@ def remove_unnecessary(dict):
         dict["price"] = {"None": dict["price"]}
 
     code = dict["name"]
+    code = re.sub('[а-яА-Я]', '', code)
 
     start = code.find("[")
-
-    if start != -1:
-        code = code[:start]
+    end = code.find("]")
+    save = code[start:end + 1]
 
     start = code.find(",")
-
     if start != -1:
         code = code[:start]
-
-    code = re.sub('[а-яА-Я]', '', code)
 
     start = code.find('"')
     next = code[start + 1:].find('"')
@@ -93,6 +102,6 @@ def remove_unnecessary(dict):
         end = code.find(')')
         code = code[:start] + code[end + 1:]
 
-    dict["code"] = code.strip()
+    dict["code"] = code.strip() + " " + save
 
     return dict

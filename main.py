@@ -28,6 +28,7 @@ class Parser:
     def Parse(self, request):
         self.__request = database.add_request(request)
 
+        self.check_site()
         result_queue = queue.Queue()
         t1 = threading.Thread(target=self.Dns_parse, args=(request, result_queue))
         t2 = threading.Thread(target=self.Citilink_parse, args=(request, result_queue))
@@ -53,7 +54,6 @@ class Parser:
         database.change_request(request)
 
     def Dns_parse(self, request, result_queue):
-        self.check_cookie()
         url_list = self.ulr_to_parse(request, "dns")
         if len(url_list) != 0:
             p = Pool(processes=15)
@@ -73,6 +73,19 @@ class Parser:
         else:
             return 0
 
+
+    def check_site(self):
+        self.check_cookie()
+        self.check_citilink()
+
+    def check_citilink(self):
+        r = requests.get(f'https://www.citilink.ru/, headers=self.__citilinkHeaders)')
+        if len(r.text) < 150:
+            driver = uc.Chrome()
+            driver.get("https://www.citilink.ru/")
+            time.sleep(1)
+            driver.close()
+
     def check_cookie(self):
         r = requests.get('https://dns-shop.ru/', cookies=self.__cookies)
 
@@ -84,9 +97,10 @@ class Parser:
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
             options.page_load_strategy = 'none'
-
-            driver = uc.Chrome(options=options)
-
+            try:
+                driver = uc.Chrome(options=options)
+            except:
+                raise
             driver.get('https://www.dns-shop.ru/')
 
             time.sleep(2)
@@ -114,7 +128,11 @@ class Parser:
         else:
             r = requests.get(f'https://www.citilink.ru/search/?text={request}&p=1', headers=self.__citilinkHeaders)
             if len(r.text) < 150:
-                driver = uc.Chrome()
+                time.sleep(5)
+                try:
+                    driver = uc.Chrome()
+                except:
+                    raise
                 driver.get("https://www.citilink.ru/")
                 time.sleep(1)
                 driver.close()
@@ -193,13 +211,16 @@ class Parser:
             if "min" in dict:
                 curr_price = dict["current"]
                 old_price = dict["min"]
+                sale = ((int(curr_price) - int(old_price)) / int(curr_price))
+                sale = int(float('{0:0.2f}'.format(sale)) * 100)
             else:
                 curr_price = dict["current"]
                 old_price = "0"
+                sale = "0"
             pr = str(curr_price) + "#" + str(old_price)
             goods.append(
                 {'original_name': good_name, 'name': good_name, 'price': pr, 'shop': "DNS", 'request': self.__request,
-                 'url': url, 'rating': rating})
+                 'url': url, 'rating': rating, 'sale': sale})
 
         return goods
 
@@ -234,31 +255,42 @@ class Parser:
                     good_price = good.find('span', {
                         'class': 'ProductCardVerticalPrice__price-current_current-price js--ProductCardVerticalPrice__price-current_current-price'}).text.strip().replace(
                         " ", "")
+                    sale = ((int(oldPrice) - int(good_price)) / int(oldPrice))
+                    sale = int(float('{0:0.2f}'.format(sale)) * 100)
                 else:
                     oldPrice = good.find('span', {
                         'class': 'ProductCardVerticalPrice__price-current_current-price js--ProductCardVerticalPrice__price-current_current-price'}).text.strip().replace(
                         " ", "")
                     good_price = "0"
+                    sale = "0"
             else:
                 continue
             pr = str(oldPrice) + "#" + str(good_price)
             goods.append({'original_name': good_name, 'name': good_name, 'price': pr, 'shop': "Citilink",
-                          'request': self.__request, 'url': url, 'rating': rating})
+                          'request': self.__request, 'url': url, 'rating': rating, 'sale': sale})
 
         return goods
 
     def add_to_db(self, data_list):
         first = data_list[0]
+        max_sale = int(first["sale"])
         for i in data_list:
             if first == i:
                 continue
             if i["code"] == first["code"]:
+                if int(i["sale"]) > max_sale:
+                    max_sale = int(i["sale"])
+                first["sale"] = str(first["sale"]) + "#" + str(i["sale"])
                 i_list = list(i["price"])
                 for k in i_list:
                     first["price"][k] = i["price"][k]
             else:
+                first["max_sale"] = max_sale
                 database.insert_db(first)
                 first = i
+                max_sale = int(first["sale"])
+
+        first["max_sale"] = max_sale
         database.insert_db(first)
 
     def organize_data(self, data_list):
