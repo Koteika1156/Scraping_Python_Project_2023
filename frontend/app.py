@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 from backend.main import Parser
 from backend.functions import split_colors, split_price, organaze_sale
 import backend.database as database
-from backend.exceptions import *
+from backend.exceptions import BrandERR, EMPTY
 
 app = Flask(__name__)
 

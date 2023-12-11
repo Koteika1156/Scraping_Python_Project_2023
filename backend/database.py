@@ -1,10 +1,12 @@
 import sqlite3
 import datetime
+from backend.config import db_name
+
 
 def check_db():
     """ Проверка на существование таблиц """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
 
         cursor.execute('''

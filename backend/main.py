@@ -7,10 +7,11 @@ import threading
 import queue
 from multiprocessing import Pool
 import random
+import re
 
 import backend.database as database
-from backend.exceptions import *
-from backend.functions import *
+from backend.exceptions import BrandERR, EMPTY
+from backend.functions import random_string, sort, restruct, remove_unnecessary
 
 
 class Parser:
