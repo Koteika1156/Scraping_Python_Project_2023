@@ -3,7 +3,6 @@ import string
 import re
 
 def random_string():
-
     """ Функция генерации строки для получения цен товаров в ДНС """
 
     return ''.join(
@@ -14,8 +13,14 @@ def random_string():
     )
 
 
-def split_colors(str_=""):
+def sort(x=str):
+    return int(x[:x.find("#")])
 
+def split_price(str_=""):
+    str_ = str_.split("#")
+    return str_
+
+def split_colors(str_=""):
     """ Предварительная обработка цен для вывода в html шаблон """
 
     str_ = str_.split(",")
@@ -24,6 +29,17 @@ def split_colors(str_=""):
         new_arr.append(i.split(":"))
     return new_arr
 
+def organaze_sale(x):
+    split_pr = split_price(x[9])
+    k = 0
+    for i in split_pr:
+        k += 1
+        if int(i) == x[10]:
+            break
+
+    list_pr = split_colors(x[3])
+    res = [list_pr[k - 1]]
+    return res
 
 def restruct(arr):
     new_arr = []
@@ -34,7 +50,6 @@ def restruct(arr):
 
 
 def remove_unnecessary(dict):
-
     """ Обработка товара """
 
     name = dict["name"]
@@ -56,38 +71,39 @@ def remove_unnecessary(dict):
             else:
                 dict["name"] = name.replace(color, " ")
             break
+    name = dict["name"]
+    name = name.strip()
+    if name[-1] == ",":
+        name = name[:len(name) - 1]
+    dict["name"] = name
 
-    if type(dict["price"]) == int:
+    if type(dict["price"]) == str:
         dict["price"] = {"None": dict["price"]}
 
     code = dict["name"]
-
-    start = code.find("[")
-
-    if start != -1:
-        code = code[:start]
-
-    start = code.find(",")
-
-    if start != -1:
-        code = code[:start]
-
     code = re.sub('[а-яА-Я]', '', code)
 
-    start = code.find('"')
+    start = code.find("[")
+    end = code.find("]")
+    save = code[start:end + 1]
 
+    start = code.find(",")
     if start != -1:
-        if code[start + 1] == '"' or code[start + 2] == '"':
-            code.replace('""', '')
-            code.replace('" "', '')
+        code = code[:start]
+
+    start = code.find('"')
+    next = code[start + 1:].find('"')
+    if start != -1:
+        if next == -1:
+            code.replace('"', '')
         else:
-            code = code[start + 1:]
+            code = code[:start] + code[next:]
 
     start = code.find('(')
     if start != -1:
         end = code.find(')')
         code = code[:start] + code[end + 1:]
 
-    dict["code"] = code.strip()
+    dict["code"] = code.strip() + " " + save
 
     return dict
