@@ -274,23 +274,28 @@ class Parser:
     def add_to_db(self, data_list):
         first = data_list[0]
         max_sale = int(first["sale"])
+        max_sale_url = first["url"]
         for i in data_list:
             if first == i:
                 continue
             if i["code"] == first["code"]:
                 if int(i["sale"]) > max_sale:
                     max_sale = int(i["sale"])
+                    max_sale_url = i["url"]
                 first["sale"] = str(first["sale"]) + "#" + str(i["sale"])
                 i_list = list(i["price"])
                 for k in i_list:
                     first["price"][k] = i["price"][k]
             else:
+                first["url"] = max_sale_url
                 first["max_sale"] = max_sale
                 database.insert_db(first)
                 first = i
                 max_sale = int(first["sale"])
+                max_sale_url = first["url"]
 
         first["max_sale"] = max_sale
+        first["url"] = max_sale_url
         database.insert_db(first)
 
     def organize_data(self, data_list):

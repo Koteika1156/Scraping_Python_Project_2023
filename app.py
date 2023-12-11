@@ -72,9 +72,9 @@ def main_page(name=[], req="", err=""):
                         A.Parse(req)
                     except (BrandERR, EMPTY) as err:
                         return render_template('main.html', name=name, err=err.err_decr, req=req)
-                    # except:
-                    #     database.delete_request(req)
-                    #     return render_template('main.html', name=name, err="Попробуйте снова.", req=req)
+                    except:
+                        database.delete_request(req)
+                        return render_template('main.html', name=name, err="Попробуйте снова.", req=req)
 
                     res = database.get_goods(req, checkbox_status, sale_status)
                     is_parsing = True

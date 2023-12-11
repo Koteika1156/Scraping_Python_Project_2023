@@ -38,10 +38,6 @@ def organaze_sale(x):
             break
 
     list_pr = split_colors(x[3])
-    print("#" * 100)
-    print(x)
-    print(list_pr, "   ", k)
-    print("#" * 100)
     res = [list_pr[k - 1]]
     return res
 
@@ -75,6 +71,12 @@ def remove_unnecessary(dict):
             else:
                 dict["name"] = name.replace(color, " ")
             break
+    name = dict["name"]
+    name = name.strip()
+    if name[-1] == ",":
+        name = name[:len(name) - 1]
+    dict["name"] = name
+
     if type(dict["price"]) == str:
         dict["price"] = {"None": dict["price"]}
 
