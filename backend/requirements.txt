@@ -1,0 +1,5 @@
+beautifulsoup4
+requests
+undetected_chromedriver
+bs4
+lxml
