@@ -1,10 +1,12 @@
 import sqlite3
 import datetime
+from config import db_name
 
 def check_db():
+
     """ Проверка на существование таблиц """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
 
         cursor.execute('''
@@ -34,9 +36,10 @@ def check_db():
         ''')
 
 def change_request(req):
+
     """ В конце парсинга устанавливает запросу флаг, что парсинг прошел успешно """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         cursor.execute(f'UPDATE requests SET successful = {True} WHERE request = "{req}"')
 
@@ -44,9 +47,10 @@ def change_request(req):
 
 
 def delete_request(req):
+
     """ Удаление добавленных товаров и запроса, в случае возникновения ошибки"""
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         req_id = check_requsts_list(req)[0]
         cursor.execute('DELETE FROM goods WHERE request_id = ?', (req_id,))
@@ -56,9 +60,10 @@ def delete_request(req):
 
 
 def check_requsts_list(value_to_check):
+
     """ Проверка на существование в БД запроса """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         check_db()
 
@@ -69,9 +74,10 @@ def check_requsts_list(value_to_check):
 
 
 def check_requests():
+
     """ Удаляет неуспешные запросы и связанные с ними товары из бд """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         cursor.execute("SELECT request_id FROM requests WHERE successful = ?", (False,))
         del_list = cursor.fetchall()
@@ -81,11 +87,12 @@ def check_requests():
 
 
 def get_all_requests():
+
     """ Получение списка запросов """
 
     check_db()
     check_requests()
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
 
         r = """select * from requests"""
@@ -95,7 +102,10 @@ def get_all_requests():
     return answ
 
 def get_goods_with_max_sale(request, is_all):
-    with sqlite3.connect('my_database.db') as con:
+
+    """ Получение товаров с маскимальной скидкой """
+
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         request.lower()
         req_id = check_requsts_list(request)[0]
@@ -119,9 +129,10 @@ def get_goods_with_max_sale(request, is_all):
         return res
 
 def get_goods(request, is_all, is_sale):
+
     """ Получение товаров из БД по запросу """
 
-    with sqlite3.connect('my_database.db') as con:
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
 
         req_id = check_requsts_list(request)[0]
@@ -147,7 +158,10 @@ def get_goods(request, is_all, is_sale):
     return result
 
 def get_date(req):
-    with sqlite3.connect('my_database.db') as con:
+
+    """ Получение даты и времени запроса """
+
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         check_db()
 
@@ -158,21 +172,22 @@ def get_date(req):
 
 
 def add_request(request):
-    """ Добавить запрос в таблицу запросов """
 
-    with sqlite3.connect('my_database.db') as con:
+    """ Добавление запроса """
+
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
         check_db()
 
         cursor.execute("SELECT * FROM requests ORDER BY request_id DESC LIMIT 1")
 
+        pos = 1
         a = cursor.fetchall()
         if a:
             pos = a[0][0] + 1
-        else:
-            pos = 1
 
         now = datetime.datetime.now().replace(microsecond=0)
+
         cursor.execute('INSERT INTO requests (request_id, request, successful, request_time) VALUES (?, ?, ?, ?)',
                        (f'{pos}', f'{request}', False, now))
 
@@ -182,9 +197,10 @@ def add_request(request):
 
 
 def insert_db(dict):
-    """ Добавить товар в таблицу товаров """
 
-    with sqlite3.connect('my_database.db') as con:
+    """ Добавление товара """
+
+    with sqlite3.connect(f'{db_name}') as con:
         cursor = con.cursor()
 
         price_str = ""

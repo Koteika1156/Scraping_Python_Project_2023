@@ -3,6 +3,7 @@ import string
 import re
 
 def random_string():
+
     """ Функция генерации строки для получения цен товаров в ДНС """
 
     return ''.join(
@@ -14,14 +15,21 @@ def random_string():
 
 
 def sort(x=str):
+
+    """ Сортировка для лямбда функции в main  """
+
     return int(x[:x.find("#")])
 
 def split_price(str_=""):
+
+    """ Предварительная обработка цен для вывода в html шаблон """
+
     str_ = str_.split("#")
     return str_
 
 def split_colors(str_=""):
-    """ Предварительная обработка цен для вывода в html шаблон """
+
+    """ Предварительная обработка цветов + цен для вывода в html шаблон """
 
     str_ = str_.split(",")
     new_arr = []
@@ -30,8 +38,13 @@ def split_colors(str_=""):
     return new_arr
 
 def organaze_sale(x):
+
+    """ Предварительная обработка скидок для вывода в html шаблон """
+
     split_pr = split_price(x[9])
+
     k = 0
+
     for i in split_pr:
         k += 1
         if int(i) == x[10]:
@@ -42,6 +55,7 @@ def organaze_sale(x):
     return res
 
 def restruct(arr):
+
     new_arr = []
     for i in arr:
         for j in i:
@@ -50,6 +64,7 @@ def restruct(arr):
 
 
 def remove_unnecessary(dict):
+
     """ Обработка товара """
 
     name = dict["name"]
@@ -71,8 +86,10 @@ def remove_unnecessary(dict):
             else:
                 dict["name"] = name.replace(color, " ")
             break
+
     name = dict["name"]
     name = name.strip()
+
     if name[-1] == ",":
         name = name[:len(name) - 1]
     dict["name"] = name

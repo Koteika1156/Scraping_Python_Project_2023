@@ -12,6 +12,7 @@ import queue
 
 
 class Parser:
+
     __cookies = {}
     __headers = {}
     __citilinkHeaders = {}
@@ -19,17 +20,27 @@ class Parser:
     max_sale = []
 
     def __init__(self):
+
+        """ Загружаем Headers для Citilink  и DNS """
+
         self.__headers = {
+
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.660 YaBrowser/23.9.5.660 Yowser/2.5 Safari/537.36',
             'X-Csrf-Token': 'uRFWgTBPbDaq7W9PW6vv2HxdHW-gVBJk2jAVTNirj92PaxS5dDk9fZiqCxgwxqWWE2l_X8INQiuPciMD6J7lsg==',
             'X-Requested-With': 'XMLHttpRequest'}
+
         self.__citilinkHeaders = {'authority': 'rpc.citilink.ru', 'x-grpc-web': '1', }
 
     def Parse(self, request):
+
+        """ Основная функция парсинга """
+
         self.__request = database.add_request(request)
 
         self.check_site()
+
         result_queue = queue.Queue()
+
         t1 = threading.Thread(target=self.Dns_parse, args=(request, result_queue))
         t2 = threading.Thread(target=self.Citilink_parse, args=(request, result_queue))
         t1.start()
@@ -54,6 +65,9 @@ class Parser:
         database.change_request(request)
 
     def Dns_parse(self, request, result_queue):
+
+        """ Функция парсинга DNS """
+
         url_list = self.ulr_to_parse(request, "dns")
         if len(url_list) != 0:
             p = Pool(processes=15)
@@ -64,6 +78,9 @@ class Parser:
             return 0
 
     def Citilink_parse(self, request, result_queue):
+
+        """ Функция парсинга Citilink """
+
         url_list = self.ulr_to_parse(request, "citilink")
         if len(url_list) != 0:
             p = Pool(processes=15)
@@ -75,10 +92,16 @@ class Parser:
 
 
     def check_site(self):
+
+        """ Предварительная проверка сайтов """
+
         self.check_cookie()
         self.check_citilink()
 
     def check_citilink(self):
+
+        """ Проверка Citilink """
+
         r = requests.get(f'https://www.citilink.ru/, headers=self.__citilinkHeaders)')
         if len(r.text) < 150:
             driver = uc.Chrome()
@@ -87,6 +110,9 @@ class Parser:
             driver.close()
 
     def check_cookie(self):
+
+        """ Проверка DNS """
+
         r = requests.get('https://dns-shop.ru/', cookies=self.__cookies)
 
         if r.status_code == 401:
@@ -119,6 +145,9 @@ class Parser:
                 cookies_are=f'current_path=0ade23fd6a439b986198c2aac1213be47601fdc95f22e1ed4bdbc2f5a7d45646a%3A2%3A%7Bi%3A0%3Bs%3A12%3A%22current_path%22%3Bi%3A1%3Bs%3A109%3A%22%7B%22city%22%3A%22a9f47dbf-f564-11de-97f8-00151716f9f5%22%2C%22cityName%22%3A%22%5Cu041f%5Cu0435%5Cu0440%5Cu043c%5Cu044c%22%2C%22method%22%3A%22manual%22%7D%22%3B%7D; lang=ru; city_path=perm; qrator_jsid={cookie_value}')
 
     def ulr_to_parse(self, request, shop):
+
+        """ Функция возвращает массив с ссылками для парсинга """
+
         request = request.strip()
         request = request.replace(" ", "+")
 
@@ -127,16 +156,6 @@ class Parser:
                              cookies=self.__cookies)
         else:
             r = requests.get(f'https://www.citilink.ru/search/?text={request}&p=1', headers=self.__citilinkHeaders)
-            if len(r.text) < 150:
-                time.sleep(5)
-                try:
-                    driver = uc.Chrome()
-                except:
-                    raise
-                driver.get("https://www.citilink.ru/")
-                time.sleep(1)
-                driver.close()
-                r = requests.get(f'https://www.citilink.ru/search/?text={request}&p=1', headers=self.__citilinkHeaders)
 
         bs = BeautifulSoup(r.text, 'lxml')
 
@@ -170,6 +189,9 @@ class Parser:
         return url_list
 
     def dns_url_parse(self, url):
+
+        """ Парсинг 1 страницы DNS """
+
         goods = []
 
         time.sleep(random.randint(1, 5))
@@ -225,6 +247,9 @@ class Parser:
         return goods
 
     def citilink_url_parse(self, url):
+
+        """ Парсинг 1 страницы Citilink """
+
         goods = []
 
         time.sleep(random.randint(1, 5))
@@ -272,6 +297,9 @@ class Parser:
         return goods
 
     def add_to_db(self, data_list):
+
+        """ Обработка и добавление товара в БД """
+
         first = data_list[0]
         max_sale = int(first["sale"])
         max_sale_url = first["url"]
@@ -299,6 +327,9 @@ class Parser:
         database.insert_db(first)
 
     def organize_data(self, data_list):
+
+        """ Предварительная обработка товара перед добавлением в бд """
+
         data_list = restruct(data_list)
         data_list = sorted(data_list, key=lambda x: (x["name"], -sort(x["price"])))
         p = Pool(processes=50)

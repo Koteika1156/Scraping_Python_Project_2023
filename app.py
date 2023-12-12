@@ -8,51 +8,62 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST', 'GET'])
 def main_page(name=[], req="", err=""):
+
     req_list = database.get_all_requests()
+
     checkbox_status = True
     sale_status = False
+
     if request.method == 'POST':
 
-        form_2 = request.form.get('select')
-        form_3 = request.form.get('select2')
-        form_4 = request.form.get('select3')
+        download_previously_data = request.form.get('select')
+        filter = request.form.get('select2')
+        Update = request.form.get('select3')
+
         checkbox = request.form.get("checkbox")
         sale = request.form.get("sale")
 
-        if form_2:
-            res = database.get_goods(form_2, checkbox_status, sale_status)
-            date = database.get_date(form_2)
-            return render_template('main.html', name=res, split_colors=split_colors, split_price=split_price,
-                                   req=form_2, req_list=req_list, is_parsing=False, date=date,
-                                   dns_sale=database.get_goods_with_max_sale(form_2, checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(form_2, checkbox_status)[0], organaze_sale=organaze_sale)
-        elif form_4:
-            database.delete_request(form_4)
-            try:
-                A.Parse(form_4)
-            except (BrandERR, EMPTY) as err:
-                return render_template('main.html', name=name, err=err.err_decr, req=form_4)
-            except:
-                database.delete_request(form_4)
-                return render_template('main.html', name=name, err="Попробуйте снова.", req=form_4)
-            date = database.get_date(form_4)
-            res = database.get_goods(form_4, checkbox_status, sale_status)
-            return render_template('main.html', name=res, split_colors=split_colors, split_price=split_price,
-                                   req=form_4,
-                                   req_list=req_list, is_parsing=True, date=date,
-                                   dns_sale=database.get_goods_with_max_sale(form_4, checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(form_4, checkbox_status)[0], organaze_sale=organaze_sale)
+        if download_previously_data:
 
-        elif form_3:
+            res = database.get_goods(download_previously_data, checkbox_status, sale_status)
+            date = database.get_date(download_previously_data)
+
+            return render_template('main.html', name=res, split_colors=split_colors, split_price=split_price,
+                                   req=download_previously_data, req_list=req_list, is_parsing=False, date=date,
+                                   dns_sale=database.get_goods_with_max_sale(download_previously_data, checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(download_previously_data, checkbox_status)[0], organaze_sale=organaze_sale)
+        elif Update:
+
+            database.delete_request(Update)
+
+            try:
+                A.Parse(Update)
+            except (BrandERR, EMPTY) as err:
+                return render_template('main.html', name=name, err=err.err_decr, req=Update)
+            except:
+                database.delete_request(Update)
+                return render_template('main.html', name=name, err="Попробуйте снова.", req=Update)
+
+            date = database.get_date(Update)
+            res = database.get_goods(Update, checkbox_status, sale_status)
+
+            return render_template('main.html', name=res, split_colors=split_colors, split_price=split_price,
+                                   req=Update,
+                                   req_list=req_list, is_parsing=True, date=date,
+                                   dns_sale=database.get_goods_with_max_sale(Update, checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(Update, checkbox_status)[0], organaze_sale=organaze_sale)
+
+        elif filter:
 
             if checkbox == "on":
                 checkbox_status = False
             if sale == "on":
                 sale_status = True
 
-            res = database.get_goods(form_3, checkbox_status, sale_status)
-            date = database.get_date(form_3)
+            res = database.get_goods(filter, checkbox_status, sale_status)
+            date = database.get_date(filter)
+
             return render_template('main.html', name=res, split_colors=split_colors, split_price=split_price,
-                                   req=form_3.lower(), req_list=req_list, is_parsing=False, date=date,
-                                   dns_sale=database.get_goods_with_max_sale(form_3.lower(), checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(form_3.lower(), checkbox_status)[0], organaze_sale=organaze_sale)
+                                   req=filter.lower(), req_list=req_list, is_parsing=False, date=date,
+                                   dns_sale=database.get_goods_with_max_sale(filter.lower(), checkbox_status)[1], citilink_sale=database.get_goods_with_max_sale(filter.lower(), checkbox_status)[0], organaze_sale=organaze_sale)
         else:
 
             req = request.form['request']
