@@ -19,6 +19,8 @@
      - re
      - string
      - random
+     - queue
+     - threading
   
 ## Туториал по установке парсера:
 
